@@ -1,0 +1,47 @@
+name: Export Issues to /cases
+
+on:
+  issues:
+    types: [opened, edited, closed]
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Export issue to Markdown
+        uses: peter-evans/create-issue-branch@v4
+        with:
+          branch: export/issue-${{ github.event.issue.number }}
+
+      - name: Write issue content
+        run: |
+          mkdir -p cases
+          filename="cases/issue-${{ github.event.issue.number }}.md"
+          echo "# ${{ github.event.issue.title }}" > $filename
+          echo "" >> $filename
+          echo "Issue Number: #${{ github.event.issue.number }}" >> $filename
+          echo "State: ${{ github.event.issue.state }}" >> $filename
+          echo "" >> $filename
+          echo "## Body" >> $filename
+          echo "${{ github.event.issue.body }}" >> $filename
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add cases/
+          git commit -m "Export issue #${{ github.event.issue.number }}"
+          git push origin export/issue-${{ github.event.issue.number }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: export/issue-${{ github.event.issue.number }}
+          title: "Export issue #${{ github.event.issue.number }}"
+          body: "Auto-export of issue to /cases"
