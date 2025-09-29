@@ -27,19 +27,18 @@ jobs:
             const issue = context.payload.issue;
             const body = issue.body || '';
 
-            function grab(label) {
+            const grab = (label) => {
               const re = new RegExp(`(?<=###\\s*${label}[\\s\\S]*?)\\n\\n([\\s\\S]*?)(?=\\n###|$)`, 'i');
-              const m = body.match(re);
-              return m ? m[1].trim() : '';
-            }
+              const m = body.match(re); return m ? m[1].trim() : '';
+            };
 
             const fromTitle = (issue.title || '')
-              .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+              .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
 
             const id = (grab('Case ID \\(slug-friendly\\)') || fromTitle || `case-${issue.number}`)
-              .toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '');
+              .toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/^-+|-+$/g,'');
 
-            const title = grab('Case Title') || issue.title || id;
+            const title   = grab('Case Title') || issue.title || id;
             const summary = grab('Summary') || '—';
 
             const owner = context.repo.owner;
@@ -48,31 +47,29 @@ jobs:
             const headBranch = `auto/case/${id}`;
             const headRefStr = `refs/heads/${headBranch}`;
 
-            // 1) получаем SHA базовой ветки
+            // 1) SHA базы
             const { data: baseRef } = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
 
-            // 2) создаём ветку, если её нет. Если есть (422) — просто читаем текущую
+            // 2) Создаём ветку, если нет (422 => уже есть)
             let parentSha;
             try {
               await github.rest.git.createRef({ owner, repo, ref: headRefStr, sha: baseRef.object.sha });
-              parentSha = baseRef.object.sha; // свежесозданная ветка указывает на base
+              parentSha = baseRef.object.sha;
             } catch (e) {
-              if (e.status !== 422) throw e; // иная ошибка — пробрасываем
+              if (e.status !== 422) throw e;
               const { data: headRef } = await github.rest.git.getRef({ owner, repo, ref: `heads/${headBranch}` });
-              parentSha = headRef.object.sha; // ветка уже есть — продолжаем от её головы
+              parentSha = headRef.object.sha;
             }
 
-            // 3) содержимое файла
+            // 3) Контент кейса
             const content = `# ${title} (${id})\n\n## Summary\n${summary}\n`;
 
-            // 4) достаём дерево родительского коммита
+            // 4) Дерево родителя
             const { data: parentCommit } = await github.rest.git.getCommit({ owner, repo, commit_sha: parentSha });
 
-            // 5) создаём blob и дерево с новым файлом
+            // 5) Blob + дерево
             const { data: blob } = await github.rest.git.createBlob({
-              owner, repo,
-              content: Buffer.from(content, 'utf8').toString('base64'),
-              encoding: 'base64'
+              owner, repo, content: Buffer.from(content,'utf8').toString('base64'), encoding: 'base64'
             });
 
             const { data: tree } = await github.rest.git.createTree({
@@ -80,20 +77,15 @@ jobs:
               tree: [{ path: `cases/${id}/README.md`, mode: '100644', type: 'blob', sha: blob.sha }]
             });
 
-            // 6) коммитим
+            // 6) Коммит
             const { data: newCommit } = await github.rest.git.createCommit({
-              owner, repo,
-              message: `Add case: ${id}`,
-              tree: tree.sha,
-              parents: [parentSha]
+              owner, repo, message: `Add case: ${id}`, tree: tree.sha, parents: [parentSha]
             });
 
-            // 7) передвигаем указатель ветки на новый коммит
-            await github.rest.git.updateRef({
-              owner, repo, ref: `heads/${headBranch}`, sha: newCommit.sha, force: false
-            });
+            // 7) Обновляем ветку
+            await github.rest.git.updateRef({ owner, repo, ref: `heads/${headBranch}`, sha: newCommit.sha, force: false });
 
-            // 8) открываем PR (если уже есть — игнорируем 422)
+            // 8) PR (если уже есть — игнорируем 422)
             const prTitle = `Add case: ${title} (${id})`;
             try {
               await github.rest.pulls.create({
@@ -101,5 +93,5 @@ jobs:
                 body: `Auto-generated from issue #${issue.number}.`
               });
             } catch (e) {
-              if (e.status !== 422) throw e; // PR уже существует — это ок
+              if (e.status !== 422) throw e;
             }
