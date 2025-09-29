@@ -1,6 +1,6 @@
 name: "New Case"
 description: "Create a new SOC investigation case (generates full report)."
-title: "[CASE] {case_title}"
+title: "[CASE] <case title>"
 labels: ["new-case"]
 body:
   - type: input
