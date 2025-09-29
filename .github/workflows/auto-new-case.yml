@@ -8,7 +8,7 @@ jobs:
   generate-case:
     if: >
       github.event.issue.state == 'open' &&
-      contains(join(github.event.issue.labels.*.name, ','), 'new-case')
+      contains(github.event.issue.labels.*.name, 'new-case')
     runs-on: ubuntu-latest
 
     permissions:
@@ -28,16 +28,25 @@ jobs:
             const body = issue.body || '';
 
             function grab(label) {
-              const re = new RegExp(`(?<=###\\s*${label}[\\s\\S]*?)\\n\\n([\\s\\S]*?)(?=\\n###|$)`, 'i');
+              // Parse markdown section:
+              // ### <label>
+              // <blank line>
+              // <content until next ### or end>
+              const re = new RegExp(`###\\s*${label}[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n###|$)`, 'i');
               const m = body.match(re);
               return m ? m[1].trim() : '';
             }
 
             const fromTitle = (issue.title || '')
-              .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+              .slice(0, 60);
 
             const id = (grab('Case ID \\(slug-friendly\\)') || fromTitle || `case-${issue.number}`)
-              .toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '');
+              .toLowerCase()
+              .replace(/[^a-z0-9-]/g, '-')
+              .replace(/^-+|-+$/g, '');
 
             const title = grab('Case Title') || issue.title || id;
             const summary = grab('Summary') || '—';
@@ -56,7 +65,7 @@ jobs:
             try {
               await github.rest.git.createRef({ owner, repo, ref: headRef, sha: baseRef.object.sha });
             } catch (e) {
-              if (!(e.status === 422)) throw e; // branch exists — continue
+              if (e.status !== 422) throw e; // branch exists — continue
             }
 
             // 3) prepare file content
@@ -87,7 +96,10 @@ jobs:
               owner, repo,
               message: `Add case: ${id}`,
               tree: tree.sha,
-              parents: [headRefData.object.sha]
+              parents: [headRefData.object.sha],
+              // optional:
+              // author: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
+              // committer: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
             });
 
             await github.rest.git.updateRef({
@@ -102,5 +114,5 @@ jobs:
                 body: `Auto-generated from issue #${issue.number}.`
               });
             } catch (e) {
-              if (!(e.status === 422)) throw e; // PR already exists -> ok
+              if (e.status !== 422) throw e; // PR already exists -> ok
             }
