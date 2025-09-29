@@ -1,0 +1,82 @@
+name: Cleanup & Consolidate Reports
+
+on:
+  workflow_dispatch: {}  # запускаешь вручную из Actions
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Consolidate reports into /cases/2025 and rebuild README
+        shell: bash
+        run: |
+          set -euo pipefail
+          YEAR="2025"
+          mkdir -p "cases/${YEAR}"
+
+          # 1) Собираем репорты из старых структур case-веток: cases/<id>/(REPORT.md|README.md)
+          #    Предпочитаем REPORT.md, если есть.
+          while IFS= read -r -d '' dir; do
+            id="$(basename "$dir")"
+            target="cases/${YEAR}/${id}.md"
+            if [[ -f "${dir}/REPORT.md" ]]; then
+              cp "${dir}/REPORT.md" "$target"
+            elif [[ -f "${dir}/README.md" ]]; then
+              cp "${dir}/README.md" "$target"
+            fi
+          done < <(find cases -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null || true)
+
+          # 2) Подбираем все .md вне папки cases и .github (например мусор из auto/, export/)
+          #    Кладём как extra-<slug>.md, чтобы ничего не потерять.
+          shopt -s nocaseglob
+          while IFS= read -r -d '' md; do
+            base="$(basename "${md%.md}")"
+            slug="$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-_' | sed 's/[_]/-/g' | cut -c1-40)"
+            [[ -z "$slug" ]] && slug="report"
+            target="cases/${YEAR}/extra-${slug}.md"
+            # Не перезаписываем существующие
+            if [[ ! -f "$target" ]]; then
+              cp "$md" "$target"
+            fi
+          done < <(find . -type f -name "*.md" \
+                    ! -path "./cases/*" \
+                    ! -path "./.github/*" \
+                    ! -name "README.md" -print0 2>/dev/null || true)
+
+          # 3) Пересобираем корневой индекс
+          {
+            echo "# SOC Investigations Archive"
+            echo
+            for y in $(ls -1 cases 2>/dev/null | sort); do
+              echo "## ${y}"
+              for f in $(ls -1 "cases/${y}"/*.md 2>/dev/null | sort); do
+                title="$(head -n 1 "$f" | sed 's/^#\s*//')"
+                [[ -z "$title" ]] && title="$(basename "$f")"
+                echo "- [${title}](${f})"
+              done
+              echo
+            done
+          } > README.md
+
+          # 4) Мягкая очистка мусора (только верхнеуровневые каталоги auto/ и export/)
+          #    Ничего из /cases/ не удаляем, чтобы не рисковать.
+          rm -rf auto export 2>/dev/null || true
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/cleanup-archive-${{ github.run_id }}
+          title: "Cleanup: consolidate reports into /cases/2025 and rebuild README"
+          commit-message: "Cleanup: consolidate reports and rebuild README"
+          body: |
+            This PR consolidates scattered Markdown reports into **/cases/2025**,
+            rebuilds the root **README.md** index, and removes top-level junk dirs **auto/** and **export/**.
+            Original files in **/cases/** are kept (no destructive changes).
+          labels: maintenance
