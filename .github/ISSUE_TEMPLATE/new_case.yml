@@ -1,6 +1,6 @@
 name: "New Case"
-description: "Create a new SOC case from template"
-title: "[CASE] <short title>"
+description: "Create a new SOC investigation case (generates full report)."
+title: "[CASE] {case_title}"
 labels: ["new-case"]
 body:
   - type: input
@@ -11,6 +11,7 @@ body:
       placeholder: "phish-2025-09-28"
     validations:
       required: true
+
   - type: input
     id: case_title
     attributes:
@@ -18,8 +19,53 @@ body:
       placeholder: "Suspicious Phishing Email from Vendor"
     validations:
       required: true
+
   - type: textarea
     id: summary
     attributes:
-      label: Summary
-      placeholder: "1-3 sentences overall summary."
+      label: Executive summary
+      description: "1–3 sentence summary of the incident and impact."
+      placeholder: "User received phishing email with malicious attachment."
+    validations:
+      required: true
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Timeline (key timestamps)
+      description: "Short timeline: timestamp — event."
+      placeholder: "2025-09-28 10:03 — user clicked link\n2025-09-28 10:05 — sandbox detected payload"
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifacts / IOCs
+      description: "List IPs, domains, URLs, file names, hashes."
+      placeholder: "- IP: 123.45.67.89\n- URL: http://bad.example/invoice.docm\n- SHA256: abc..."
+
+  - type: textarea
+    id: analysis
+    attributes:
+      label: Technical analysis
+      description: "What you saw in sandbox/logs/Kibana. Tools & commands used."
+      placeholder: "Sandbox: executed macro, dropped payload; file opened network 123.45.67.89:443; KQL searches ..."
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Actions taken / Mitigation
+      description: "Blocks, notifications, IOC pushes, user resets, containment."
+      placeholder: "- Blocked sender in Exchange\n- Isolated host\n- Rotated creds"
+
+  - type: textarea
+    id: recommendations
+    attributes:
+      label: Recommendations / Next steps
+      description: "What to do next for remediation and prevention."
+      placeholder: "- Full host forensics\n- Update detection rules\n- User awareness training"
+
+  - type: input
+    id: owner
+    attributes:
+      label: Case owner
+      placeholder: "Analyst Name"
