@@ -1,91 +1,137 @@
-- name: Parse, create/advance branch, commit file, open PR
-  uses: actions/github-script@v7
-  with:
-    script: |
-      const issue = context.payload.issue;
-      const body  = issue.body || '';
+name: Auto create case from issue (full report)
 
-      // --- helpers ---
-      const grab = (label) => {
-        const re = new RegExp(`(?<=###\\s*${label}[\\s\\S]*?)\\n\\n([\\s\\S]*?)(?=\\n###|$)`, 'i');
-        const m = body.match(re); return m ? m[1].trim() : '';
-      };
-      const slugify = (s) =>
-        (s || '')
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g,'-')
-          .replace(/^-+|-+$/g,'');
+on:
+  issues:
+    types: [opened, edited, labeled]
 
-      // --- inputs from Issue Form ---
-      let caseId = slugify(grab('Case ID \\(slug-friendly\\)'));
-      const caseTitle = grab('Case Title') || issue.title || 'case';
-      const summary   = grab('Executive summary') || grab('Summary') || '';
-      const ownerNameField = grab('Case owner') || '';
+jobs:
+  generate-case:
+    if: >
+      github.event.issue.state == 'open' &&
+      contains(join(github.event.issue.labels.*.name, ','), 'new-case')
+    runs-on: ubuntu-latest
 
-      // гарантируем валидный caseId
-      if (!caseId) caseId = slugify(caseTitle);
-      if (!caseId) caseId = `case-${issue.number}`;
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
 
-      const owner = context.repo.owner;
-      const repo  = context.repo.repo;
-      const base  = context.payload.repository.default_branch;
-      const headBranch = `auto/case/${caseId}`;            // heads/auto/case/<id>
-      const headRefStr = `refs/heads/${headBranch}`;       // ПОЛНАЯ форма для createRef
-      const shortHeadRef = `heads/${headBranch}`;          // КОРОТКАЯ форма для updateRef/getRef
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      // 1) базовый ref
-      const { data: baseRef } = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
+      - name: Parse, create/advance branch, commit files, open PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body  = issue.body || '';
 
-      // 2) создаём ветку, если её нет
-      let parentSha;
-      try {
-        await github.rest.git.createRef({ owner, repo, ref: headRefStr, sha: baseRef.object.sha });
-        parentSha = baseRef.object.sha;
-      } catch (e) {
-        if (e.status !== 422) throw e; // not "already exists"
-        const { data: headRef } = await github.rest.git.getRef({ owner, repo, ref: shortHeadRef });
-        parentSha = headRef.object.sha;
-      }
+            const grab = (label) => {
+              const re = new RegExp(`(?<=###\\s*${label}[\\s\\S]*?)\\n\\n([\\s\\S]*?)(?=\\n###|$)`, 'i');
+              const m = body.match(re); return m ? m[1].trim() : '';
+            };
+            const slugify = (s) =>
+              (s || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 
-      // 3) подготавливаем контент
-      const reportMd = `# ${caseTitle} (${caseId})
-**Case owner:** ${ownerNameField || '—'}
-**Executive summary:** ${summary || '—'}
-`;
-      const readmeMd = `# ${caseTitle} (${caseId})
+            let caseId = slugify(grab('Case ID \\(slug-friendly\\)'));
+            const caseTitle = grab('Case Title') || issue.title || 'case';
+            const summary   = grab('Executive summary') || grab('Summary') || '';
+            const timeline  = grab('Timeline') || '';
+            const artifacts = grab('Artifacts / IOCs') || '';
+            const analysis  = grab('Technical analysis') || '';
+            const mitigation = grab('Actions taken / Mitigation') || '';
+            const recommendations = grab('Recommendations / Next steps') || '';
+            const ownerName = grab('Case owner') || '—';
 
-**Summary:** ${summary || '—'}
-`;
+            if (!caseId) caseId = slugify(caseTitle);
+            if (!caseId) caseId = `case-${issue.number}`;
 
-      // 4) получаем дерево родителя
-      const { data: parentCommit } = await github.rest.git.getCommit({ owner, repo, commit_sha: parentSha });
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const base  = context.payload.repository.default_branch;
+            const headBranch = `auto/case/${caseId}`;
+            const fullRef = `refs/heads/${headBranch}`;
+            const shortRef = `heads/${headBranch}`;
 
-      // 5) создаём blob'ы
-      const toB64 = (s) => Buffer.from(s, 'utf8').toString('base64');
-      const { data: reportBlob } = await github.rest.git.createBlob({ owner, repo, content: toB64(reportMd), encoding: 'base64' });
-      const { data: readmeBlob } = await github.rest.git.createBlob({ owner, repo, content: toB64(readmeMd), encoding: 'base64' });
+            // 1) base ref
+            const baseRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
 
-      // 6) новое дерево
-      const { data: tree } = await github.rest.git.createTree({
-        owner, repo, base_tree: parentCommit.tree.sha,
-        tree: [
-          { path: `cases/${caseId}/REPORT.md`, mode: '100644', type: 'blob', sha: reportBlob.sha },
-          { path: `cases/${caseId}/README.md`, mode: '100644', type: 'blob', sha: readmeBlob.sha }
-        ]
-      });
+            // 2) create branch if missing
+            let parentSha;
+            try {
+              await github.rest.git.createRef({ owner, repo, ref: fullRef, sha: baseRef.data.object.sha });
+              parentSha = baseRef.data.object.sha;
+            } catch (e) {
+              if (e.status !== 422) throw e;
+              const headRef = await github.rest.git.getRef({ owner, repo, ref: shortRef });
+              parentSha = headRef.data.object.sha;
+            }
 
-      // 7) коммит
-      const { data: newCommit } = await github.rest.git.createCommit({
-        owner, repo, message: `Add case: ${caseId}`, tree: tree.sha, parents: [parentSha]
-      });
+            // 3) files content
+            const reportMd = [
+              `# ${caseTitle} (${caseId})`,
+              ``,
+              `**Case owner:** ${ownerName}`,
+              `**Executive summary:** ${summary || '—'}`,
+              ``,
+              `---`,
+              ``,
+              `## 1) Timeline`,
+              timeline || '—',
+              ``,
+              `## 2) Artifacts / IOCs`,
+              artifacts || '—',
+              ``,
+              `## 3) Technical analysis`,
+              analysis || '—',
+              ``,
+              `## 4) Actions taken (containment & remediation)`,
+              mitigation || '—',
+              ``,
+              `## 5) Recommendations`,
+              recommendations || '—',
+              ``,
+              `## 6) References`,
+              `- Issue: ${issue.html_url}`
+            ].join('\n');
 
-      // 8) ОБНОВЛЯЕМ ref ПРАВИЛЬНОЙ формой ("heads/..."), НЕ "refs/heads/..."
-      await github.rest.git.updateRef({ owner, repo, ref: shortHeadRef, sha: newCommit.sha, force: false });
+            const readmeMd = [
+              `# ${caseTitle} (${caseId})`,
+              ``,
+              `**Summary:** ${summary || '—'}`,
+              `**Owner:** ${ownerName}`
+            ].join('\n');
 
-      // 9) PR (ignore 422)
-      const prTitle = `Add case: ${caseTitle} (${caseId})`;
-      try {
-        await github.rest.pulls.create({ owner, repo, title: prTitle, head: headBranch, base, body: `Auto-generated from issue #${issue.number}.` });
-      } catch (e) {
-        if (e.status !== 422) throw e;
-      }
+            // 4) parent tree
+            const parentCommit = await github.rest.git.getCommit({ owner, repo, commit_sha: parentSha });
+
+            // 5) blobs
+            const b64 = (s) => Buffer.from(s, 'utf8').toString('base64');
+            const reportBlob = await github.rest.git.createBlob({ owner, repo, content: b64(reportMd), encoding: 'base64' });
+            const readmeBlob = await github.rest.git.createBlob({ owner, repo, content: b64(readmeMd), encoding: 'base64' });
+
+            // 6) tree with two files
+            const tree = await github.rest.git.createTree({
+              owner, repo, base_tree: parentCommit.data.tree.sha,
+              tree: [
+                { path: `cases/${caseId}/REPORT.md`, mode: '100644', type: 'blob', sha: reportBlob.data.sha },
+                { path: `cases/${caseId}/README.md`, mode: '100644', type: 'blob', sha: readmeBlob.data.sha }
+              ]
+            });
+
+            // 7) commit
+            const commit = await github.rest.git.createCommit({
+              owner, repo, message: `Add case: ${caseId}`, tree: tree.data.sha, parents: [parentSha]
+            });
+
+            // 8) update ref — ВАЖНО: используем "heads/..." (без префикса refs/)
+            await github.rest.git.updateRef({ owner, repo, ref: shortRef, sha: commit.data.sha, force: false });
+
+            // 9) PR
+            const prTitle = `Add case: ${caseTitle} (${caseId})`;
+            try {
+              await github.rest.pulls.create({ owner, repo, title: prTitle, head: headBranch, base, body: `Auto-generated from issue #${issue.number}.` });
+            } catch (e) {
+              if (e.status !== 422) throw e;
+            }
