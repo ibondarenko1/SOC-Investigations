@@ -65,7 +65,9 @@ body:
       placeholder: "- Full host forensics\n- Update detection rules\n- User awareness training"
 
   - type: input
-    id: owner
-    attributes:
-      label: Case owner
-      placeholder: "Analyst Name"
+  id: case_owner
+  attributes:
+    label: Case owner
+    description: Who is responsible for the case?
+    placeholder: Enter name
+    value: "Ievgen Bondarenko"
