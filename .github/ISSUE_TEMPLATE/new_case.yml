@@ -1,7 +1,9 @@
 name: "New Case"
 description: "Create a new SOC investigation case (generates full report)."
 title: "[CASE] <case title>"
-labels: ["new-case"]
+labels:
+  - "new-case"
+
 body:
   - type: input
     id: case_id
@@ -33,41 +35,34 @@ body:
     id: timeline
     attributes:
       label: Timeline (key timestamps)
-      description: "Short timeline: timestamp — event."
-      placeholder: "2025-09-28 10:03 — user clicked link\n2025-09-28 10:05 — sandbox detected payload"
+      placeholder: "2025-09-28 10:03 — user clicked link"
 
   - type: textarea
     id: artifacts
     attributes:
       label: Artifacts / IOCs
-      description: "List IPs, domains, URLs, file names, hashes."
-      placeholder: "- IP: 123.45.67.89\n- URL: http://bad.example/invoice.docm\n- SHA256: abc..."
+      placeholder: "- IP: 203.0.113.45\n- URL: http://bad.example/\n- SHA256: abc..."
 
   - type: textarea
     id: analysis
     attributes:
       label: Technical analysis
-      description: "What you saw in sandbox/logs/Kibana. Tools & commands used."
-      placeholder: "Sandbox: executed macro, dropped payload; file opened network 123.45.67.89:443; KQL searches ..."
+      placeholder: "Sandbox/EDR/SIEM notes..."
 
   - type: textarea
     id: mitigation
     attributes:
       label: Actions taken / Mitigation
-      description: "Blocks, notifications, IOC pushes, user resets, containment."
-      placeholder: "- Blocked sender in Exchange\n- Isolated host\n- Rotated creds"
+      placeholder: "- Blocked sender\n- Isolated host\n- Reset creds"
 
   - type: textarea
     id: recommendations
     attributes:
       label: Recommendations / Next steps
-      description: "What to do next for remediation and prevention."
-      placeholder: "- Full host forensics\n- Update detection rules\n- User awareness training"
+      placeholder: "- Hunt for IOCs\n- Update detections"
 
   - type: input
-  id: case_owner
-  attributes:
-    label: Case owner
-    description: Who is responsible for the case?
-    placeholder: Enter name
-    value: "Ievgen Bondarenko"
+    id: owner
+    attributes:
+      label: Case owner
+      value: "Ievgen Bondarenko"
