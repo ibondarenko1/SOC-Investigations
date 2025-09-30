@@ -1,55 +1,92 @@
-name: Save Issues to Cases
+name: Archive Issue to cases/
 
 on:
   issues:
-    types: [opened, edited]  # при создании/правке issue
+    types: [opened]
 
-# Разрешаем воркфлоу коммитить файлы в репо
 permissions:
   contents: write
 
 jobs:
-  save:
+  archive:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Create/Update case file
+      - name: Build case folder and README
+        shell: bash
         env:
           TITLE: ${{ github.event.issue.title }}
-          NUM: ${{ github.event.issue.number }}
           BODY: ${{ github.event.issue.body }}
+          NUMBER: ${{ github.event.issue.number }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+          CREATED_AT: ${{ github.event.issue.created_at }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
-          mkdir -p cases
-          # безопасный слаг из заголовка (без пробелов/слэшей/кириллицы и т.д.)
-          slug="$(echo "$TITLE" \
-            | tr '[:upper:]' '[:lower:]' \
-            | tr ' ' '-' \
-            | sed -E 's/[^a-z0-9._-]+/-/g' \
-            | sed -E 's/^-+|-+$//g')"
+          # делаем slug из заголовка (только a-z0-9-)
+          SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+          CASE_ID="case-${NUMBER}-${SLUG}"
+          CASE_DIR="cases/${CASE_ID}"
 
-          file="cases/${NUM}-${slug}.md"
-
-          {
-            echo "# $TITLE"
-            echo
-            echo "$BODY"
-            echo
-            echo "_Source: issue #${NUM}_"
-          } > "$file"
-
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-
-          git add cases/
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          # если уже существует — ничего не делаем
+          if [ -d "$CASE_DIR" ]; then
+            echo "Case already archived: $CASE_DIR"
             exit 0
           fi
 
-          git commit -m "Save report from issue #${{ github.event.issue.number }}"
+          mkdir -p "$CASE_DIR"
+
+          cat > "${CASE_DIR}/README.md" <<'MD'
+# ${TITLE}
+
+**Case ID:** ${CASE_ID}  
+**Issue #:** ${NUMBER}  
+**Opened by:** @${AUTHOR}  
+**Opened at:** ${CREATED_AT}  
+**Source ticket:** ${ISSUE_URL}
+
+---
+
+## Executive summary
+(кратко: что произошло и к чему пришли)
+
+## Timeline (key timestamps)
+- t0 – обнаружение
+- …
+
+## Artifacts / IOCs
+- IP src: …
+- Host: …
+- URL: …
+
+## Technical analysis
+(кратко: что видели в логах, какие запросы, попытки логина и т.д.)
+
+## Actions taken / Mitigation
+- Блокировка IP …
+- Обновлены правила …
+
+## Recommendations / Next steps
+- …
+
+---
+
+### Details from ticket
+${BODY}
+MD
+
+          # подставляем переменные в файл
+          sed -i "s|\${TITLE}|$TITLE|g" "${CASE_DIR}/README.md"
+          sed -i "s|\${CASE_ID}|$CASE_ID|g" "${CASE_DIR}/README.md"
+          sed -i "s|\${NUMBER}|$NUMBER|g" "${CASE_DIR}/README.md"
+          sed -i "s|\${AUTHOR}|$AUTHOR|g" "${CASE_DIR}/README.md"
+          sed -i "s|\${CREATED_AT}|$CREATED_AT|g" "${CASE_DIR}/README.md"
+          sed -i "s|\${ISSUE_URL}|$ISSUE_URL|g" "${CASE_DIR}/README.md"
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add cases/
+          git commit -m "Archive case #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
           git push
