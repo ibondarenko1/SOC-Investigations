@@ -72,7 +72,7 @@ EDR and endpoint telemetry show a sequence: external downloads → modification 
 ---
 
 ## Closure note
-**Closure date:** `<вставь дату/время>`  
+**Closure date:** `9.30.2025`  
 **Owner:** Ievgen Bondarenko
 
 All mandatory sandbox artifacts were collected and attached. Containment confirmed and persistence removed in sandbox. No new local admin account found. Case closed as **True Positive (sandbox)**.
