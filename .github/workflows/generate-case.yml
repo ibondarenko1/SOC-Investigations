@@ -1,0 +1,71 @@
+name: Generate Case
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  create:
+    if: contains(join(github.event.issue.labels.*.name, ' '), 'new-case')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create case folder and README
+        env:
+          ID:   ${{ github.event.issue.body }}
+          NUM:  ${{ github.event.issue.number }}
+          TITLE: ${{ github.event.issue.title }}
+          URL:   ${{ github.event.issue.html_url }}
+          USER:  ${{ github.event.issue.user.login }}
+          DATE:  ${{ github.event.issue.created_at }}
+        run: |
+          # Достаём Case ID (первая строка формы)
+          CASE_ID=$(echo "$ID" | grep -A1 "Case ID" | tail -n1 | tr -d '\r')
+          DIR="cases/$CASE_ID"
+          mkdir -p "$DIR"
+
+          cat > "$DIR/README.md" <<EOF
+# $TITLE
+
+**Case ID:** $CASE_ID  
+**Issue #:** $NUM  
+**Opened by:** @$USER  
+**Opened at:** $DATE  
+**Source ticket:** $URL  
+
+---
+
+## Executive summary
+$(echo "$ID" | grep -A1 "Executive summary" | tail -n1)
+
+## Timeline
+$(echo "$ID" | grep -A1 "Timeline" | tail -n1)
+
+## Artifacts / IOCs
+$(echo "$ID" | grep -A1 "Artifacts / IOCs" | tail -n1)
+
+## Technical analysis
+$(echo "$ID" | grep -A1 "Technical analysis" | tail -n1)
+
+## Actions taken / Mitigation
+$(echo "$ID" | grep -A1 "Actions taken / Mitigation" | tail -n1)
+
+## Recommendations / Next steps
+$(echo "$ID" | grep -A1 "Recommendations / Next steps" | tail -n1)
+
+---
+
+**Owner:** $(echo "$ID" | grep -A1 "Case owner" | tail -n1)
+EOF
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add cases/
+          git commit -m "Add case $CASE_ID from issue #${{ github.event.issue.number }}" || true
+          git push
