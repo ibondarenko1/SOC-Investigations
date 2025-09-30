@@ -1,37 +1,59 @@
-# [CASE] <case title>
+# Utilman.exe Winlogon Exploit Attempt (Henry)
 
-### Case ID (slug-friendly)
+**Case ID:** utilman-2025-09-29  
+**Host:** Henry (172.16.17.149)  
+**Opened by:** Ievgen Bondarenko  
+**Status:** Closed (sandbox)
 
-уац
+---
 
-### Case Title
+## Executive summary
+Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege escalation. Adversary tried to add a local administrator account. Investigation confirmed exploitation attempt, but no persistent local account remained. Host was contained, and persistence artifacts were reviewed.
 
-ка3й
+---
 
-### Executive summary
+## Timeline (key timestamps)
+- 2023-06-21 11:02 — Alert triggered (`Utilman.exe exploit attempt`).  
+- 2023-06-21 12:24 — Analyst investigated host Henry.  
+- 2023-06-21 12:30 — Host contained, persistence entries reviewed.  
+- Case closed as **True Positive**.
 
-му
+---
 
-### Timeline (key timestamps)
+## Artifacts / IOCs
+- **IP Address:** 172.16.17.149  
+- **Process:** Utilman.exe  
+- **Parent Process:** Winlogon.exe  
+- **Suspicious Command:** `net user superman onepunch123 /add`  
+- **Process Hash:** `ded8fd7f36417f66eb6ada10e0c0d7c0022986e9`  
 
-_No response_
+---
 
-### Artifacts / IOCs
+## Technical analysis
+- `Utilman.exe` executed as child of `Winlogon.exe`.  
+- Suspicious command attempted to add a new local user (`superman`).  
+- Verification: no such user was created.  
+- Autoruns analysis showed persistence attempt via alternate shells.  
 
-_No response_
+---
 
-### Technical analysis
+## Actions taken
+- Host contained in sandbox.  
+- Verified no new accounts exist.  
+- Persistence entries reviewed and cleared.  
+- Alert closed as **True Positive**.  
 
-_No response_
+---
 
-### Actions taken / Mitigation
+## Recommendations
+1. Harden accessibility executables.  
+2. Monitor LOLBin usage across hosts.  
+3. Add detection for persistence via Winlogon AlternateShells.  
 
-_No response_
+---
 
-### Recommendations / Next steps
+## Closure note
+**Closure date:** 2025-09-29  
+**Owner:** Ievgen Bondarenko  
 
-_No response_
-
-### Case owner
-
-Ievgen Bondarenko
+True Positive — Utilman.exe LOLBin attempt to create local user. No user created, host contained, persistence mitigated.
