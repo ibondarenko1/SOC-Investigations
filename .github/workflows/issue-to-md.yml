@@ -1,47 +1,55 @@
-name: Export Issues to /cases
+name: Save Issues to Cases
 
 on:
   issues:
-    types: [opened, edited, closed]
+    types: [opened, edited]  # при создании/правке issue
 
+# Разрешаем воркфлоу коммитить файлы в репо
 permissions:
   contents: write
-  issues: read
 
 jobs:
-  export:
+  save:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Export issue to Markdown
-        uses: peter-evans/create-issue-branch@v4
         with:
-          branch: export/issue-${{ github.event.issue.number }}
+          fetch-depth: 0
 
-      - name: Write issue content
+      - name: Create/Update case file
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          NUM: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.issue.body }}
         run: |
           mkdir -p cases
-          filename="cases/issue-${{ github.event.issue.number }}.md"
-          echo "# ${{ github.event.issue.title }}" > $filename
-          echo "" >> $filename
-          echo "Issue Number: #${{ github.event.issue.number }}" >> $filename
-          echo "State: ${{ github.event.issue.state }}" >> $filename
-          echo "" >> $filename
-          echo "## Body" >> $filename
-          echo "${{ github.event.issue.body }}" >> $filename
+          # безопасный слаг из заголовка (без пробелов/слэшей/кириллицы и т.д.)
+          slug="$(echo "$TITLE" \
+            | tr '[:upper:]' '[:lower:]' \
+            | tr ' ' '-' \
+            | sed -E 's/[^a-z0-9._-]+/-/g' \
+            | sed -E 's/^-+|-+$//g')"
 
-      - name: Commit & push
+          file="cases/${NUM}-${slug}.md"
+
+          {
+            echo "# $TITLE"
+            echo
+            echo "$BODY"
+            echo
+            echo "_Source: issue #${NUM}_"
+          } > "$file"
+
+      - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add cases/
-          git commit -m "Export issue #${{ github.event.issue.number }}"
-          git push origin export/issue-${{ github.event.issue.number }}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: export/issue-${{ github.event.issue.number }}
-          title: "Export issue #${{ github.event.issue.number }}"
-          body: "Auto-export of issue to /cases"
+          git add cases/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Save report from issue #${{ github.event.issue.number }}"
+          git push
