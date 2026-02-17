@@ -1,4 +1,4 @@
-..# 🛡️  Security — SOC Investigations Repository
+...# 🛡️  Security — SOC Investigations Repository
 
 Centralized repository for documenting security incidents, investigations, and AI-assisted SOC workflows.  
 This repository reflects professional SOC/MSSP operations using standardized case templates, GitHub Actions automation, and MITRE ATT&CK–aligned investigation methodology.
