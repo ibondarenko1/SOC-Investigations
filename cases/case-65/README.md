@@ -2,6 +2,10 @@
 
 > **Source:** SierraLab IT-115 Security Onion lab — hands-on investigation. Sensor `sierralabseconion` (SO 2.4.211, IP `172.16.99.200`). Internal red-team / blue-team exercise on the lab segment `172.16.99.0/24`. No production data.
 
+
+
+![Security Onion console walkthrough — Onion AI → Alerts → Hunt → Cases → LFI case detail → Detections → Dashboards → PCAP → Grid](evidence/00_so_walkthrough.gif)
+
 ### Case ID (slug-friendly)
 lfi-etc-passwd-2026-04-24
 
