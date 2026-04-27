@@ -21,6 +21,31 @@ body:
       placeholder: "Suspicious Phishing Email from Vendor"
     validations:
       required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source / Environment
+      description: "Where this case originated."
+      options:
+        - SierraLab Security Onion (hands-on)
+        - LetsDefend SOC Analyst (training)
+        - TryHackMe / HTB
+        - CTF
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
 
   - type: textarea
     id: summary
@@ -69,6 +94,13 @@ body:
         - Isolated affected endpoint
         - Reset user credentials
         - Updated detection rule
+  - type: textarea
+    id: mitre
+    attributes:
+      label: MITRE ATT&CK Mapping
+      placeholder: |
+        - T1110.001 - Brute Force: Password Guessing
+        - T1078 - Valid Accounts
 
   - type: textarea
     id: recommendations
