@@ -8,6 +8,8 @@ Cases are grouped by source. **Hands-on labs** are investigations driven on a re
 |----|-------|
 | [case-63](case-63/) | Security Onion PCAP Triage - Lab Job 1001 |
 | [case-64](case-64/) | SSH Brute-Force Detection via journalctl |
+| [case-65](case-65/) | LFI /etc/passwd Detection on Internal Web Server |
+| [case-66](case-66/) | Internal Host Resolved Malicious Domain (DNS Triage) |
 
 ## SOC Training (LetsDefend SOC Analyst path)
 
