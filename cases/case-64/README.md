@@ -50,6 +50,17 @@ The journal of a lab Ubuntu host was inspected for evidence of repeated authenti
 - **Network response:** in a real environment, the host firewall (`ufw deny from <ip>`) plus a temporary edge ACL would be the standard containment.
 - **Hardening:** disable password auth (`PasswordAuthentication no` in `/etc/ssh/sshd_config`), enforce keys + MFA at the bastion. Document this even on lab hosts so the muscle memory matches production.
 
+
+### Evidence (Security Onion console screenshots)
+
+**Hunt query view** — typical analyst pivot for Linux auth events:
+
+![SO Hunt query](evidence/01_so_hunt_query.png)
+
+**Detections / Suricata rule catalog** — context for what's loaded on the sensor:
+
+![SO Detections — Suricata rules](evidence/02_so_suricata_rules.png)
+
 ### MITRE ATT&CK Mapping
 
 - **T1110.001** — Brute Force: Password Guessing
