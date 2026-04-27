@@ -56,6 +56,21 @@ No external indicators worth threat-intel publication — this is a controlled l
 - Closed SO case with verdict `lab-validated`.
 - Recorded reproducible workflow (case ref + job ID) so the same triage can be re-run for grading / future exercises.
 
+
+### Evidence (Security Onion console screenshots)
+
+**SO PCAP search interface** — where job 1001 was retrieved:
+
+![SO PCAP search](evidence/01_so_pcap_view.png)
+
+**Cases dashboard** — the case lives alongside other lab triage entries:
+
+![SO Cases dashboard](evidence/02_so_cases_dashboard.png)
+
+**Grid status** — sensor health at the time of capture:
+
+![SO Grid status](evidence/03_so_grid_status.png)
+
 ### MITRE ATT&CK Mapping
 
 - **T1046** — Network Service Discovery (matched pattern, lab simulation)
