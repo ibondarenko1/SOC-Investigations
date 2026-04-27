@@ -41,6 +41,21 @@ The Onion AI DNS-resolution summary surfaced one internal host, `10.10.0.74`, th
 - **Host triage:** image / snapshot `10.10.0.74` before re-imaging. Pull running-process list, scheduled-task list, browser history, and recently-modified executables.
 - **User awareness:** if a real user logs into this host, follow up with a short interview about recent installs / clicked links / phishing emails received.
 
+
+### Evidence (Security Onion console screenshots)
+
+**Onion AI assistant — DNS resolution summary** showing single-host fingerprint of `10.10.0.74` resolving the malicious domain `barneystinson.com`:
+
+![Onion AI DNS summary — 10.10.0.74 → barneystinson.com](evidence/01_onion_ai_dns_summary.png)
+
+**Hunt view** — companion DNS lookup-failure stream for the related `barneystinson.local`:
+
+![Hunt — DNS lookup failures for barneystinson.local](evidence/02_hunt_dns_failures.png)
+
+**Dashboards** — broader DNS-related visibility for time-window pivot:
+
+![SO Dashboards view — DNS context](evidence/03_dashboards.png)
+
 ### MITRE ATT&CK Mapping
 - **T1071.004** — Application Layer Protocol: DNS (likely C2 channel mechanism)
 - **T1568.002** — Dynamic Resolution: Domain Generation Algorithms *(if cycle of domains is observed)*
