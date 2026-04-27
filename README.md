@@ -1,130 +1,97 @@
-# 🛡️  Security — SOC Investigations Repository
+# SOC Investigations Repository
 
-Centralized repository for documenting security incidents, investigations, and AI-assisted SOC workflows.  
-This repository reflects professional SOC/MSSP operations using standardized case templates, GitHub Actions automation, and MITRE ATT&CK–aligned investigation methodology.
+Documenting SOC investigations and incident-response writeups in a consistent, reproducible format. Includes hands-on lab work on Security Onion (SierraLab IT-115 environment) and structured practice cases from the LetsDefend SOC Analyst training path.
+
+**[Browse the case index ->](cases/INDEX.md)**
 
 ---
 
-## 📊 Active SOC Cases (Dynamic Counter)
+## Case counter
 
 <p align="center">
-  <img src="https://img.shields.io/github/directory-file-count/ibondarenko1/SOC-Investigations/cases?label=Active%20SOC%20Cases&style=for-the-badge&color=blue" />
+  <img src="https://img.shields.io/github/directory-file-count/ibondarenko1/SOC-Investigations/cases?type=dir&label=Total%20Cases&style=for-the-badge&color=blue" />
 </p>
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
+```
 SOC-Investigations/
-├── .github/
-│ └── workflows/
-│ └── new_case.yml # Auto-generates cases from Issues
-├── cases/
-│ └── <case-id>/ # Generated investigation folders
-│ └── README.md # Final SOC case report
-├── templates/
-│ ├── case_template.md # Manual SOC case template
-│ └── issue_template.md # GitHub Issue → Case generator
-└── README.md
+|-- .github/
+|   |-- ISSUE_TEMPLATE/
+|   |   `-- new-case.yml         # Issue form for opening a new case
+|   `-- workflows/
+|       `-- generate-case.yml    # Auto-creates cases/case-N/ from issues
+|-- cases/
+|   |-- INDEX.md                 # Categorized case index
+|   `-- case-NN/                 # Investigation folders
+|       `-- README.md            # Final SOC case report
+|-- templates/
+|   |-- case_template.md         # Manual case template
+|   `-- issue_template.md        # Markdown issue body template
+`-- README.md
+```
 
 ---
 
-## 🚀 How to Create a New Case
+## Hands-on vs. Practice
 
-1. Open **Issues → New Case**  
-2. Fill in the investigation fields  
-3. Add label: **`new-case`**  
-4. Submit  
+This repo contains **two kinds** of cases - they are kept in the same format but are clearly separated:
 
-GitHub Action will automatically:
+| Type | Source | Examples |
+|------|--------|----------|
+| **Hands-on lab** | SierraLab IT-115 Security Onion lab. Investigation driven through Hunt -> Cases -> so-pcap on a real sensor. | case-63 (PCAP triage), case-64 (SSH brute-force) |
+| **SOC training** | LetsDefend SOC Analyst path - practice writeups in incident-response format. Each tagged with a Source disclaimer. | case-17 - case-62 |
 
-- create a folder under `cases/<case-id>/`  
-- generate a complete SOC Case README  
-- open a Pull Request  
-
-This ensures consistent, automated SOC documentation.
+The goal is the same: produce a reproducible, MITRE-mapped, evidence-driven writeup of every alert worth opening.
 
 ---
 
-## 🧠  SOC Pipeline
+## How to Open a New Case
 
-This diagram shows how  investigations: triage → enrichment → case drafting → analyst validation → auto-storage.
+1. **Issues -> New Issue -> "New SOC Case"** (uses the issue form)
+2. Fill in: Case Title, Source/Environment, Severity, Summary, Timeline, IOCs, MITRE, Mitigation, Lessons
+3. Submit (label `new-case` is auto-applied)
+
+A GitHub Action picks it up and auto-creates `cases/case-N/README.md` with the issue body. You can later add `evidence/` subfolder with redacted log excerpts or screenshots.
+
+---
+
+## Standard Case Format
+
+Every case README follows this skeleton - see [`templates/case_template.md`](templates/case_template.md):
+
+- **Executive Summary** (2-4 sentences)
+- **Timeline** (key timestamps)
+- **IOCs / Artifacts**
+- **Technical Analysis** (pivot trail)
+- **Mitigation / Response Actions**
+- **MITRE ATT&CK Mapping**
+- **Lessons Learned**
+- **Tooling**
+
+---
+
+## Investigation Pipeline
 
 ```mermaid
 flowchart LR
-    A[Alert Generated (SIEM / EDR / Firewall)] --> B
+    A[Alert] --> B{Triage}
+    B -->|Benign| Z[Auto-close]
+    B -->|Suspicious| C[Enrichment / Pivot]
+    B -->|Malicious| D[Containment]
+    C --> E[Threat Intel + MITRE Mapping]
+    C --> F[Evidence Capture]
+    D --> G[Endpoint Isolation]
+    E --> H[Case README + Issue]
+    F --> H
+    G --> H
+    H --> I[GitHub Action archives to cases/]
+```
 
-    B -->|Benign| Z[Auto-Close Alert]
-    B -->|Suspicious| C[AI Enrichment]
-    B -->|Malicious| D[High Severity Path]
+---
 
-    C --> E[Threat Intel Lookup (VT, AbuseIPDB, URLScan)]
-    C --> F[MITRE Technique Mapping]
-    C --> G[Context Summary]
+## Author
 
-    D --> H[Endpoint Isolation]
-    D --> I[AI Drafts Initial Case]
-
-    E --> I
-    F --> I
-    G --> I
-
-    I --> J[Analyst Review]
-    J --> K[Create GitHub Issue]
-    K --> L[GitHub Action Generates Case Folder]
-    L --> M[SOC Case Stored]
-    M --> N[Knowledge Base Growth]
-
-🧩 SOC Case Template Structure
-
-Every case includes:
-
-Executive Summary
-
-Timeline
-
-Indicators of Compromise (IOCs)
-
-Technical Analysis
-
-Mitigation & Response Actions
-
-Recommendations / Next Steps
-
-AI Prompt & Response 
-
-Case Owner
-
-This ensures full traceability and consistent quality of incident reports.
-
-📘 Purpose
-
-This repository serves as:
-
-A centralized SOC knowledge base
-
-A training tool for developing analyst skills
-
-A real portfolio of incident investigations
-
-A foundation for building automated SOC workflows
-
-A structured documentation system aligned with enterprise IR standards
-
-🛡️ Maintainer
-
-Evgeniy Bondarenko
-Security Architect & SOC Lead
-Founder — CiberBond Security
-
-🔧 Planned Enhancements
-
-Automated enrichment (VirusTotal, URLScan, AbuseIPDB)
-
-Auto-export incident reports to PDF
-
-MITRE ATT&CK technique heatmaps
-
-AI-generated triage summaries
-
-Integration with SIEM/SOAR pipelines
+[Ievgen Bondarenko](https://github.com/ibondarenko1) - SOC Analyst / Security Researcher

@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Phishing Email with Malicious Attachment (aaronluo@cmail.carleton.ca)
 
 ### Case ID (slug-friendly)

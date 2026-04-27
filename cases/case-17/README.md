@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # Utilman.exe Winlogon Exploit Attempt (Henry)
 
 **Case ID:** utilman-2025-09-29  
@@ -7,12 +9,12 @@
 
 ---
 
-## Executive summary
+### Executive summary
 Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege escalation. Adversary tried to add a local administrator account. Investigation confirmed exploitation attempt, but no persistent local account remained. Host was contained, and persistence artifacts were reviewed.
 
 ---
 
-## Timeline (key timestamps)
+### Timeline (key timestamps)
 - 2023-06-21 11:02 — Alert triggered (`Utilman.exe exploit attempt`).  
 - 2023-06-21 12:24 — Analyst investigated host Henry.  
 - 2023-06-21 12:30 — Host contained, persistence entries reviewed.  
@@ -20,7 +22,7 @@ Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege
 
 ---
 
-## Artifacts / IOCs
+### Artifacts / IOCs
 - **IP Address:** 172.16.17.149  
 - **Process:** Utilman.exe  
 - **Parent Process:** Winlogon.exe  
@@ -29,7 +31,7 @@ Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege
 
 ---
 
-## Technical analysis
+### Technical analysis
 - `Utilman.exe` executed as child of `Winlogon.exe`.  
 - Suspicious command attempted to add a new local user (`superman`).  
 - Verification: no such user was created.  
@@ -37,7 +39,7 @@ Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege
 
 ---
 
-## Actions taken
+### Actions taken
 - Host contained in sandbox.  
 - Verified no new accounts exist.  
 - Persistence entries reviewed and cleared.  
@@ -45,14 +47,14 @@ Alert triggered on suspicious use of `Utilman.exe` (LOLBIN) attempting privilege
 
 ---
 
-## Recommendations
+### Recommendations
 1. Harden accessibility executables.  
 2. Monitor LOLBin usage across hosts.  
 3. Add detection for persistence via Winlogon AlternateShells.  
 
 ---
 
-## Closure note
+### Closure note
 **Closure date:** 2025-09-29  
 **Owner:** Ievgen Bondarenko  
 

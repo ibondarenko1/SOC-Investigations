@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Confluence RCE Exploitation Attempt (CVE-2023-22515)
 
 ### Case ID (slug-friendly)

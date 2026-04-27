@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] SOC119 - Proxy: Malicious Executable File Detected
 
 ### Case ID (slug-friendly)

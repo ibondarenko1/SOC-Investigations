@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Phishing Email – Excel 4.0 Macro / PowerShell C2 Activity
 
 ### Case ID (slug-friendly)

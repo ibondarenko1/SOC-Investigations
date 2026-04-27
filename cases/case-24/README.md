@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] CVE-2023-29357 Exploitation Attempt on SharePoint Server
 
 ### Case ID (slug-friendly)

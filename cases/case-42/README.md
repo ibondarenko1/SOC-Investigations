@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Investigate Web Attack – bWAPP Compromise Attempt
 
 ### Case ID (slug-friendly)

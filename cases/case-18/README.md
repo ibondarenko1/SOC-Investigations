@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # Utilman.exe Winlogon Exploit Attempt (Henry)
 
 **Case ID:** utilman-2025-09-30  

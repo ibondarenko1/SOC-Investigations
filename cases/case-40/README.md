@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] SSH Scan Activity – Authorized Red Team Exercise
 
 ### Case ID (slug-friendly)

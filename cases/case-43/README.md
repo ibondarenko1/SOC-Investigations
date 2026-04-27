@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Phishing email with malicious attachment — Vendor impersonation
 
 ### Case ID (slug-friendly)

@@ -1,3 +1,5 @@
+> **Source:** LetsDefend SOC Analyst training - educational practice case. Hosts, IPs, usernames, and timestamps reflect the training environment, not a production engagement.
+
 # [CASE] Cobalt Strike / Meterpreter Remote Access on Workstation Alex-HP
 
 ### Case ID (slug-friendly)
