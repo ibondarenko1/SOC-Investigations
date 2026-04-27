@@ -6,6 +6,26 @@ Documenting SOC investigations and incident-response writeups in a consistent, r
 
 ---
 
+## What this looks like
+
+Animated walkthrough of the Security Onion console used for hands-on cases (Onion AI → Alerts → Hunt → Cases → case detail → Detections → Dashboards → PCAP → Grid):
+
+![Security Onion console walkthrough](docs/so_walkthrough.gif)
+
+A real investigation page from this lab — `ET WEB_SERVER /etc/passwd Detected in URI`, full triage, recommended defense and verdict ([case-65](cases/case-65/)):
+
+![SO case detail — LFI /etc/passwd](docs/so_case_lfi_detail.png)
+
+Cases dashboard — 27 open SO cases on the lab sensor:
+
+![SO Cases dashboard](docs/so_cases_dashboard.png)
+
+Onion AI — DNS resolution summary identifying a single internal host resolving a malicious domain ([case-66](cases/case-66/)):
+
+![Onion AI DNS investigation](docs/so_onion_ai_dns.png)
+
+---
+
 ## Case counter
 
 <p align="center">
