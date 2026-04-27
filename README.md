@@ -46,13 +46,13 @@ This ensures consistent, automated SOC documentation.
 
 ---
 
-## 🧠 AI-Assisted SOC Pipeline
+## 🧠  SOC Pipeline
 
-This diagram shows how AI assists investigations: triage → enrichment → case drafting → analyst validation → auto-storage.
+This diagram shows how  investigations: triage → enrichment → case drafting → analyst validation → auto-storage.
 
 ```mermaid
 flowchart LR
-    A[Alert Generated (SIEM / EDR / Firewall)] --> B{AI Triage}
+    A[Alert Generated (SIEM / EDR / Firewall)] --> B
 
     B -->|Benign| Z[Auto-Close Alert]
     B -->|Suspicious| C[AI Enrichment]
@@ -91,7 +91,7 @@ Mitigation & Response Actions
 
 Recommendations / Next Steps
 
-AI Prompt & Response (AI Support Summary)
+AI Prompt & Response 
 
 Case Owner
 
