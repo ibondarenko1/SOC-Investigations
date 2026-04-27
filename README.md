@@ -41,7 +41,7 @@ This repo contains **two kinds** of cases - they are kept in the same format but
 
 | Type | Source | Examples |
 |------|--------|----------|
-| **Hands-on lab** | SierraLab IT-115 Security Onion lab. Investigation driven through Hunt -> Cases -> so-pcap on a real sensor. | case-63 (PCAP triage), case-64 (SSH brute-force) |
+| **Hands-on lab** | SierraLab IT-115 Security Onion lab. Investigation driven through Hunt -> Cases -> so-pcap on a real sensor. | case-63 (PCAP triage), case-64 (SSH brute-force), **case-65 (LFI detection)**, **case-66 (malicious DNS resolution)** |
 | **SOC training** | LetsDefend SOC Analyst path - practice writeups in incident-response format. Each tagged with a Source disclaimer. | case-17 - case-62 |
 
 The goal is the same: produce a reproducible, MITRE-mapped, evidence-driven writeup of every alert worth opening.
