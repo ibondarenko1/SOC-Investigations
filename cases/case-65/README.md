@@ -53,6 +53,25 @@ Suricata rule `sid 2049400 — ET WEB_SERVER /etc/passwd Detected in URI` fired 
 - SO Case acknowledged; no production impact (lab segment).
 - Continue to monitor `172.16.99.2` for follow-up exploit traffic and lateral movement.
 
+
+### Evidence (Security Onion console screenshots)
+
+**Live SO case page** — full triage record `fSELw50BiRBAe-XkrS-o`:
+
+![SO case detail page — ET WEB_SERVER /etc/passwd Detected in URI](evidence/01_so_case_detail.png)
+
+**Cases dashboard** — this case in context with 26 other open SO cases:
+
+![SO Cases dashboard](evidence/02_so_cases_list.png)
+
+**Alerts view** — the analyst view that pivots into the case:
+
+![SO Alerts view](evidence/03_so_alerts.png)
+
+**Detections** — Suricata rule catalog (where the LFI signature lives):
+
+![SO Detections / Suricata rules](evidence/04_so_detections.png)
+
 ### MITRE ATT&CK Mapping
 - **T1190** — Exploit Public-Facing Application
 - **T1083** — File and Directory Discovery (intent of LFI payload)
