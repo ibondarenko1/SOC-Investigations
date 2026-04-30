@@ -54,6 +54,12 @@ Suricata triggered `ET SCAN Nmap Scripting Engine User-Agent Detected` 356 times
   - Define an internal allow-list of authorised internal scanners in the SOC playbook so this kind of recurrence is closed within minutes by Tier 1, not Tier 2.
   - If `172.16.99.2` is **not** authorised, escalate immediately to incident response: lateral SMB/RDP probing combined with active Nmap is the textbook reconnaissance phase before lateral movement.
 
+### Evidence (Security Onion console screenshots)
+
+**SO Case detail** — `M_7U250BiRBAe-XkD0JL`. Status flipped to `in progress`, dedupe-comment posted at 23:47 PT, and observable `ip 172.16.99.15` added in this triage:
+
+![SO Case detail — Nmap NSE recurring scanner](evidence/01_so_case_detail.png)
+
 ### MITRE ATT&CK Mapping
 - **T1595.001** — Active Scanning: Scanning IP Blocks (Nmap host discovery on `172.16.99.0/24`).
 - **T1595.002** — Active Scanning: Vulnerability Scanning (Nmap NSE script-based probing).
