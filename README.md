@@ -1,4 +1,4 @@
-ю# SOC Investigations Repository
+юю# SOC Investigations Repository
 
 Documenting SOC investigations and incident-response writeups in a consistent, reproducible format. Includes hands-on lab work on Security Onion (SierraLab IT-115 environment) and structured practice cases from the LetsDefend SOC Analyst training path.
 
